@@ -20,9 +20,9 @@ for(i in 1:n){
 
 plot(seq_len(n),erro, type = "l",
      log = "xy",
-     main = "Estimation of square root of 2",
-     xlab = "Number of samples",
-     ylab = "Relative error",
+     main = "Erro relativo do estimador",
+     xlab = "Numero de amostras",
+     ylab = "Erro relativo",
      xlim = c(10^1,10^5))
 
 #Questao 2####
@@ -120,26 +120,21 @@ print(sm)
 
 #Item 2: Estimativa de Gn (metodo monte carlo)
 inv_h <- function(x,n) sqrt(x*n*(n+1)) #transformada inversa de h
-erro_relativo <- function(sm,gn,n) sqrt((sm-(gn^2))/n)
+erro_relativo <- function(sm,gn,n) (sm-gn)/gn
 
-n <- 2
+n <- 10^4
 erro <- numeric(0)
 for(i in 1:n){
-  print(i)
   sm <- sum((g(i)^2)/h(i,n))
-  print(sm)
   x <- inv_h(runif(i),i) #amostras de h
-  print(x)
-  s <- sum(g(x)/h(x,i))
-  print(s)
+  s <- round(sum(g(x)/h(x,i)), digits = 0)
   gn <- s/i
-  print(gn)
   erro <- c(erro,erro_relativo(sm,gn,i))
 }
 
-plot(seq(1,n),erro, type = "l",
+plot(seq_len(n),erro, type = "l",
      log = "xy",
-     main = "Analise: Estimador x sqrt(2)",
+     main = "Erro relativo do estimador",
      xlab = "Numero de amostras",
      ylab = "Erro relativo")
 
@@ -186,11 +181,11 @@ colnames(tabela) <- c("alfa1_b1","alfa1_b2","alfa1_b3",
                     "alfa3_b1","alfa3_b2","alfa3_b3")
 
 #Grafico
-plot(n,tabela[,9], log = "xy",
+plot(n,tabela[,9],
      main = "Erro relativo do estimador da integral de f",
      xlab = "Numero de amostras",
      ylab = "Erro relativo",
-     xlim = c(10^1, 10^5),
+     xlim = c(10^1, 10^4),
      type = "l", lwd=2)
 lines(tabela[,1], col= "red",lwd=2)
 lines(tabela[,2], col= "green",lwd=2)
@@ -210,35 +205,33 @@ legend("topright", legend = c("alfa1_b1","alfa1_b2","alfa1_b3",
 #Questao 7####
 #Item 1: Algoritmo para gerar uma permutacao
 permuta <- function(n){
+  vetor <- seq_len(n)
   for(i in 0:(n-1)){
     j <- runif(1,1,n-i)
-    tmp <- permuta[j]
-    permuta[j] <- permuta[n-i]
-    permuta[n-i] <- tmp;
+    tmp <- vetor[j]
+    vetor[j] <- vetor[n-i]
+    vetor[n-i] <- tmp;
   }
+  return(vetor)
 }
-n <- 10
-permuta(n)
+n <- 5
+print(permuta(n))
 
 #Item 2
-mchoose <- function(n,k){
-  factorial(n)/prod(factorial(k))
+arranjo <- function(n,k){
+  factorial(n)/factorial(n-k)
 }
 
 n <- c(10^4,10^6,10^8) #conjunto de objetos
-k <- c(10^1,10^2,10^3,10^4) #subconjunto de tamanho k
-S <- mchoose(n,k) #espaco amostral
-      
+k <- c(10^1,10^2,10^3,10^4) #subconjuntos de tamanho k
+v <- numeric(0)
 system.time(
-for(k in 1:(10^3)){
-  for(j in 1:length(S)){
-    permuta <- seq(1,S[j])
-    for(i in 0:n-1){
-      j <- runif(1,1,n-i)
-      tmp <- permuta[j]
-      permuta[j] <- permuta[n-i]
-      permuta[n-i] <- tmp;
+  for(i in 1:length(k)){
+    for(q in 1:length(n)){
+      for(l in 1:10^3){
+        s <- arranjo(n[q],k[i]) #espaco amostral
+        v <- c(v,permuta(s)) 
+      }
     }
   }
-}
-)
+ )
