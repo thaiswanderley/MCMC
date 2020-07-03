@@ -1,0 +1,244 @@
+# Questao 1####
+#Item 3: Implementacao do metodo de monte carlo
+f <- function(x) -x^2+2 
+
+x <- runif(1000,0,2) #amostras uniformes
+Mn <- mean(f(x)) #media amostral
+g <- 3*Mn #Estimativa da integral de f
+print(g)
+
+#Item 4: Erro relativo do estimador
+en <- function(x) 3*mean(f(x))
+erro_relativo <- function(x) abs(x - sqrt(2))/sqrt(2)
+
+n <- 10^5
+erro <- numeric(0)
+for(i in 1:n){
+  x <- runif(i,0,2)  
+  erro <- c(erro,erro_relativo(en(x)))
+}
+
+plot(seq_len(n),erro, type = "l",
+     log = "xy",
+     main = "Estimation of square root of 2",
+     xlab = "Number of samples",
+     ylab = "Relative error",
+     xlim = c(10^1,10^5))
+
+#Questao 2####
+#Item 1: Transformada inversa exponencial
+inversa_exp <- function(u,lambda) -log(u)/lambda
+
+n <- seq_len(10^4)
+lambda <- 1
+U <- runif(n,0,1)
+X <- inversa_exp(U,lambda)
+
+hist(X, freq = F, 
+     main = "Exponencial resultante de uma uniforme",
+     xlim = c(0,12))
+
+#Item 2: Transformada inversa Pareto
+inversa_par <- function(u,x0,alfa){
+  ((x0^alfa)/(1-u))^(1/alfa)
+}
+
+n <- seq_len(100)
+x0 <- 1.5
+alfa <- 1
+U <- runif(n,0,1)
+X <- inversa_par(U,x0,alfa)
+hist(X, freq = F,
+     main = "Pareto resultante de uma uniforme")
+
+#Questao 3####
+#Item 3: Implementacao do metodo de monte carlo
+S <- function(k){
+  sum <- 0
+  for(i in 1:k){
+    sum <- sum+(factorial(26)/factorial(26-i))  
+  }
+  return(sum)
+}  
+
+k <- 2
+n <- 10
+x <- runif(n,0,S(2)) #amostras uniformes
+Mn <- 7/2 #media amostral
+wn <- S(2)*Mn #Estimativa do numero de dominios
+print(wn)
+
+#Questao 4####
+f <- function(x) (1/sqrt(2*pi))*exp(-(x^2)/2)
+
+g <- function(x) -log(x) #transformada inversa exponencial
+
+#Metodo da rejeicao
+n <- 10^3
+i <- 0
+vx <- rep(0,n)
+for(i in 1:n){
+  x <- g(runif(1)) #amostras exponenciais
+  u <- runif(1)*g(x) #amostras uniformes
+  if(u < f(x)){
+    vx[i] <- x #vetor com os numeros aleatorios de Z
+  }
+}
+
+#Grafico normal com funcao envelope
+dados <- seq(-5,5, by=0.1)
+dados2 <- seq(0,5, by=0.1)
+plot(dados,f(dados),type = "l",ylim = c(0,0.6),
+     main = "Funcao Z x Funcao envelope g",
+     xlab = "X",
+     ylab = "Z(X)")
+lines(dados2,g(dados2))
+lines(-dados2,g(dados2))
+
+#Grafico distribuicao normal
+plot(vx,f(vx), xlim = c(-10,10),
+     ylim = c(0,0.6),
+     main = "Amostras normais geradas pelo metodo da rejeicao",
+     xlab = "amostras",
+     ylab = "Z(amostras)")
+points(-vx,f(vx))
+
+#Questao 5####
+#Item 1: Calculo do segundo momento
+g <- function(i) i*log(i)
+
+h <- function(i,n){
+  i/((n*(n+1))/2)
+}
+
+n <- 10^6
+sm <- 0
+for(i in 1:n){
+  sm <- sm+(g(i)^2)/h(i,n) 
+}
+print(sm)
+
+#Item 2: Estimativa de Gn (metodo monte carlo)
+inv_h <- function(x,n) sqrt(x*n*(n+1)) #transformada inversa de h
+erro_relativo <- function(sm,gn,n) sqrt((sm-(gn^2))/n)
+
+n <- 2
+erro <- numeric(0)
+for(i in 1:n){
+  print(i)
+  sm <- sum((g(i)^2)/h(i,n))
+  print(sm)
+  x <- inv_h(runif(i),i) #amostras de h
+  print(x)
+  s <- sum(g(x)/h(x,i))
+  print(s)
+  gn <- s/i
+  print(gn)
+  erro <- c(erro,erro_relativo(sm,gn,i))
+}
+
+plot(seq(1,n),erro, type = "l",
+     log = "xy",
+     main = "Analise: Estimador x sqrt(2)",
+     xlab = "Numero de amostras",
+     ylab = "Erro relativo")
+
+
+#Questao 6####
+#Implementacao do metodo de monte carlo (item 3)
+f <- function(x,alfa) x^alfa
+
+alfa <- 1
+a <- 1
+b <- 2
+n <- 10^3
+x <- runif(n,a,b) #amostras uniformes
+Mn <- mean(f(x,alfa)) #media amostral
+g <- (b-a)*Mn #Estimativa da integral de f
+print(g)
+
+#Erro relativo do estimador (item 4)
+f <- function(x,alfa) x^alfa
+gn <- function(n,alfa,a,b) (b-a)*mean(f(n,alfa))
+g <- function(alfa,a,b) (b^(alfa+1) - a^(alfa+1))/(alfa+1)
+erro_relativo <- function(gn,g) abs(gn - g)/g
+
+n <- seq(1,10^4)
+alfa <- c(1,2,3)
+a <- 0
+b <- c(1,2,4)
+erro <- numeric(0)
+
+for(i in 1:length(alfa)){
+  for(j in 1:length(b)){
+    for(k in 1:length(n)){
+      x <- runif(k,a,b[j])
+      integral <- g(alfa[i],a,b[j])
+      estimador <- gn(x,alfa[i],a,b[j])
+      erro <- c(erro,erro_relativo(estimador,integral))
+    }
+  }
+}
+
+tabela <- matrix(erro,nrow = length(n),byrow = FALSE)
+colnames(tabela) <- c("alfa1_b1","alfa1_b2","alfa1_b3",
+                    "alfa2_b1","alfa2_b2","alfa2_b3",
+                    "alfa3_b1","alfa3_b2","alfa3_b3")
+
+#Grafico
+plot(n,tabela[,9], log = "xy",
+     main = "Erro relativo do estimador da integral de f",
+     xlab = "Numero de amostras",
+     ylab = "Erro relativo",
+     xlim = c(10^1, 10^5),
+     type = "l", lwd=2)
+lines(tabela[,1], col= "red",lwd=2)
+lines(tabela[,2], col= "green",lwd=2)
+lines(tabela[,3], col= "yellow",lwd=2)
+lines(tabela[,4], col= "purple",lwd=2)
+lines(tabela[,5], col= "deeppink",lwd=2)
+lines(tabela[,6], col= "blue",lwd=2)
+lines(tabela[,7], col= "darkorange",lwd=2)
+lines(tabela[,8], col= "darkgray",lwd=2)
+legend("topright", legend = c("alfa1_b1","alfa1_b2","alfa1_b3",
+                              "alfa2_b1","alfa2_b2","alfa2_b3",
+                              "alfa3_b1","alfa3_b2","alfa3_b3"),
+       col = c("red","green","yellow","purple","deeppink","blue","darkorange","darkgray","black"),
+       pch = 3)
+
+
+#Questao 7####
+#Item 1: Algoritmo para gerar uma permutacao
+permuta <- function(n){
+  for(i in 0:(n-1)){
+    j <- runif(1,1,n-i)
+    tmp <- permuta[j]
+    permuta[j] <- permuta[n-i]
+    permuta[n-i] <- tmp;
+  }
+}
+n <- 10
+permuta(n)
+
+#Item 2
+mchoose <- function(n,k){
+  factorial(n)/prod(factorial(k))
+}
+
+n <- c(10^4,10^6,10^8) #conjunto de objetos
+k <- c(10^1,10^2,10^3,10^4) #subconjunto de tamanho k
+S <- mchoose(n,k) #espaco amostral
+      
+system.time(
+for(k in 1:(10^3)){
+  for(j in 1:length(S)){
+    permuta <- seq(1,S[j])
+    for(i in 0:n-1){
+      j <- runif(1,1,n-i)
+      tmp <- permuta[j]
+      permuta[j] <- permuta[n-i]
+      permuta[n-i] <- tmp;
+    }
+  }
+}
+)
