@@ -1,0 +1,111 @@
+#Questao 3####
+#Item 3
+
+#Distancia de variacao total
+dvt <- function(lambda,t){
+  return((1/2)*(lambda^t))
+}
+
+#Grafo em anel
+P <- matrix(0,nrow = 100,ncol = 100)
+
+for(i in 1:100){
+  for(j in 1:100){
+    if(i==j){
+      P[i,j] = 1/2
+    }
+    else if(abs(i-j)==1){
+      P[i,j] = 1/4
+    }
+    else if(i==1 && j==5){
+      P[i,j] = 1/4
+    }
+    else if(i==5 && j==1){
+      P[i,j] = 1/4
+    }
+  }
+}
+
+#Autovalores e autovetores
+r <- eigen(P)
+lambda <- r$values
+v <- r$vectors
+
+#Dvt aproximado
+t <- runif(100,1,10^3)
+d_anel <- dvt(lambda,t)
+
+#Arvore Binaria
+P <- matrix(0,nrow = 128,ncol = 128)
+
+for(i in 1:128){
+  for(j in 1:128){
+    if(i==j){
+      P[i,j] = 1/2
+    }
+    else if(j==2*i || j==2*i+1 || j==i/2 || j == (i-1)/2){
+      P[i,j] = 1/6
+    }
+    else if(i==1 && j==2 || j==3){
+      P[i,j] = 1/4
+    }
+  }
+}
+
+#Autovalores e autovetores
+r <- eigen(P)
+lambda <- r$values
+v <- r$vectors
+
+#Dvt aproximado
+t <- runif(128,1,10^3)
+d_arvore <- dvt(lambda,t)
+
+#Grid 2D
+P <- matrix(0,nrow = 128,ncol = 128)
+
+for(i in 1:128){
+  for(j in 1:128){
+    if(i==j){
+      P[i,j] = 1/2
+    }
+    else if(abs(i-j)==1){
+      P[i,j] = 1/4
+    }
+  }
+}
+
+#Autovalores e autovetores
+r <- eigen(P)
+lambda <- r$values
+v <- r$vectors
+
+#Dvt aproximado
+t <- runif(100,1,10^3)
+d_grid <- dvt(lambda,t)
+
+#Grafico
+plot(t,d_anel, log = "xy",
+     type = "l", lwd=2)
+lines(d_arvore,col= "red",lwd=2)
+lines(d_grid,col= "green",lwd=2)
+
+#Questao 4####
+epsilon <- 10^-4
+n <- c(10,50,100,300,700,1000)
+
+#Grafo em anel
+t_mistura <- numeric(0)
+for(i in 1:length(n)){
+  tn = n[i]^2
+  t_mistura <- c(t_mistura,tn)
+}
+
+#Arvore binaria
+t_mistura <- numeric(0)
+for(i in 1:length(n)){
+  tn = 16*n[i]
+  t_mistura <- c(t_mistura,tn)
+}
+
+
